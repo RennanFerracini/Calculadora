@@ -1,0 +1,91 @@
+import tkinter as tk
+from tkinter import messagebox
+from PIL import Image, ImageTk
+import os
+import sys
+
+def calcular_plr(salario_total, avaliacao, porcentagem_plr):
+    pagamento = {
+        1: 0,
+        2: 50,
+        3: 80,
+        4: 100,
+        5: 110,
+        6: 130
+    }
+
+    if avaliacao not in pagamento:
+        raise ValueError("Avaliação inválida. Deve estar entre 1 e 6.")
+
+    porcentagem_pagamento = pagamento[avaliacao]
+    target_semestral = salario_total * 6.5 * porcentagem_plr / 100
+    valor_final = porcentagem_pagamento * target_semestral
+    return valor_final
+
+def calcular_e_exibir():
+    try:
+        salario_dia_15 = float(salario_15_var.get())
+        salario_dia_30 = float(salario_30_var.get())
+        salario_total = salario_dia_15 + salario_dia_30
+        avaliacao = int(avaliacao_var.get())
+        porcentagem_plr = 5
+
+        valor_final = calcular_plr(salario_total, avaliacao, porcentagem_plr)
+        valor_final /= 100  # Ajuste de casas decimais
+
+        # Exibe a soma do primeiro cálculo e o valor final na mesma caixa de diálogo
+        messagebox.showinfo("Resultado",
+                            f"Soma do salário: R${salario_total:.2f}\n"
+                            f"Valor final a ser pago: R${valor_final:.2f}")
+
+        # Limpar os campos preenchidos
+        salario_15_var.set('')
+        salario_30_var.set('')
+        avaliacao_var.set('')
+
+    except ValueError as e:
+        messagebox.showerror("Erro", str(e))
+
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    else:
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+
+icon_path = resource_path(os.path.join("imagem", "Money.ico"))
+
+app = tk.Tk()
+app.title("Calculadora de PLR")
+app.configure(bg="LightGray")
+
+if getattr(sys, "frozen", False):
+    # Executável
+    base_dir = sys._MEIPASS
+else:
+    # Código Python
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+icon_path = os.path.join(base_dir, "imagem", "Money.ico")
+icone = Image.open(icon_path)
+icone_photoimage = ImageTk.PhotoImage(icone)
+app.call("wm", "iconphoto", app._w, icone_photoimage)
+
+salario_15_var = tk.StringVar()
+salario_30_var = tk.StringVar()
+avaliacao_var = tk.StringVar()
+
+tk.Label(app, text="Valor da 1ª Parcela do Salário:",bg="LightGray").grid(row=0, column=0, sticky="e")
+tk.Entry(app, textvariable=salario_15_var, bg="LightBlue").grid(row=0, column=1)
+
+tk.Label(app, text="Valor da 2ª Parcela do Salário:",bg="LightGray").grid(row=1, column=0, sticky="e")
+tk.Entry(app, textvariable=salario_30_var, bg="LightBlue").grid(row=1, column=1)
+
+tk.Label(app, text="Nota Avaliação Pessoal (1 a 6):",bg="LightGray").grid(row=2, column=0, sticky="e")
+tk.Entry(app, textvariable=avaliacao_var, bg="LightBlue").grid(row=2, column=1)
+
+tk.Label(app, text="By:Ferracini",bg="LightCyan").grid(row=3, column=2, sticky="e")
+
+tk.Button(app, text="Calcular", command=calcular_e_exibir, bg="LightGreen").grid(row=3, column=1, columnspan=1,) 
+
+app.mainloop()
